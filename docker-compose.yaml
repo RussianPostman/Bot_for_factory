@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  bd:
+    container_name: pg_db
+    image: postgres:14-alpine
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: ubnfhf
+      POSTGRES_DB: my_db
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    restart: on-failure
+    ports:
+      - "5433:5433"
+  
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: miha@mial.ru
+      PGADMIN_DEFAULT_PASSWORD: ubnfhf
+    ports:
+        - "5050:80"
+
+  # bot:
+  #   image: russianpostman/bot:v1.0
+  #   ports:
+  #     - "80:80"
+  #   container_name: bot_1
+  #   restart: always
+  #   command: python main.py
+  #   env_file:
+  #     - .env
+volumes: 
+  pg_data:
