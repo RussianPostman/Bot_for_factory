@@ -1,10 +1,10 @@
-import os
-import asyncio
-import logging
-from aiogram import Bot, Dispatcher
-from dotenv import load_dotenv
+# import os
+# import asyncio
+# import logging
+# from aiogram import Bot, Dispatcher
+# from dotenv import load_dotenv
 
-from ..bot.handlers import register_router
+# from ..bot.handlers import register_router
 
 # # from bot.handlers import register_router 
 

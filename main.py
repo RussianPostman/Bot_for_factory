@@ -1,17 +1,23 @@
 import os
 import asyncio
 import logging
+
 from aiogram import Bot, Dispatcher
 from aiogram.types import BotCommand
+# from dotenv import load_dotenv
 from dotenv import load_dotenv
+from sqlalchemy import URL
 
 from bot.handlers import register_user_commands
 from bot.settings import bot_commands
+from bot.db import create_async_engine, get_session_maker
+from bot.middleweres import RegisterCheck
 
 load_dotenv()
 
 
 TELEGRAM_TOKEN = os.getenv('TOKEN')
+
 
 async def main():
     logging.basicConfig(level=logging.DEBUG)
@@ -24,9 +30,24 @@ async def main():
     bot = Bot(TELEGRAM_TOKEN)
     await bot.set_my_commands(commands=commands_for_bot)
 
+    postgres_url = URL.create(
+        drivername="postgresql+asyncpg",
+        username=os.getenv("POSTGRES_USER"),
+        host='127.0.0.1',
+        database=os.getenv("POSTGRES_DB"),
+        port=8765,
+        password=os.getenv("POSTGRES_PASSWORD")
+    )
+
+    dp.message.middleware(RegisterCheck())
+    dp.callback_query.middleware(RegisterCheck())
+
     register_user_commands(dp)
 
-    await dp.start_polling(bot)
+    async_engine = create_async_engine(postgres_url)
+    session_maker = get_session_maker(async_engine)
+
+    await dp.start_polling(bot, session_maker=session_maker)
 
 
 if __name__ == '__main__':

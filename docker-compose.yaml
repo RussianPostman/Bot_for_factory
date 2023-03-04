@@ -1,19 +1,27 @@
-version: '3.8'
+version: "3.9"
 
 services:
-  bd:
-    container_name: pg_db
-    image: postgres:14-alpine
+  postgres:
+    container_name: ppostgres.postgres
+    image: "postgres:15-alpine"
+    restart: unless-stopped
+    expose:
+      - "5432"
+    ports:
+      - "127.0.0.1:8765:5432"
     environment:
       POSTGRES_USER: root
       POSTGRES_PASSWORD: ubnfhf
       POSTGRES_DB: my_db
     volumes:
-      - pg_data:/var/lib/postgresql/data
-    restart: on-failure
-    ports:
-      - "5433:5433"
-  
+      - "ppostgres.postgres.data:/var/lib/postgresql/data:rw"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 60s
+      retries: 5
+      start_period: 10s
+
   pgadmin:
     container_name: pgadmin
     image: dpage/pgadmin4
@@ -23,14 +31,5 @@ services:
     ports:
         - "5050:80"
 
-  # bot:
-  #   image: russianpostman/bot:v1.0
-  #   ports:
-  #     - "80:80"
-  #   container_name: bot_1
-  #   restart: always
-  #   command: python main.py
-  #   env_file:
-  #     - .env
-volumes: 
-  pg_data:
+volumes:
+  ppostgres.postgres.data: {}
