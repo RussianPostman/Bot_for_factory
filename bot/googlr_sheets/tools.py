@@ -20,11 +20,37 @@ def get_creds():
 agcm = AsyncioGspreadClientManager(get_creds)
 
 
+# async def example(agcm):
+#     agc: gspread_asyncio.AsyncioGspreadClient = await agcm.authorize()
+#     ss = await agc.open_by_url(USERS_SHEETS)
+#     zero_ws = await ss.worksheet('My Test Worksheet')
+#     pprint(await zero_ws.get_all_values())
+#     print("All done!")
+
+
+async def create_worksheet(
+        name: str,
+        heads: list[str],
+        agcm: AsyncioGspreadClientManager = agcm,
+        rows: int = 3,
+        cols: int = 3
+        ):
+    """
+    Создать гугл таблицу
+    :param name:
+    :param heads:
+    :rows:
+    :cols:
+    """
+    agc: gspread_asyncio.AsyncioGspreadClient = await agcm.authorize()
+    ss = await agc.open_by_url(USERS_SHEETS)
+    await ss.add_worksheet(name, rows, cols)
+    new_worksheet = await ss.worksheet(name)
+    await new_worksheet.append_row(heads)
+
+
 async def read_roles(agcm: AsyncioGspreadClientManager = agcm):
     agc: gspread_asyncio.AsyncioGspreadClient = await agcm.authorize()
     ss = await agc.open_by_url(USERS_SHEETS)
     role_ws = await ss.worksheet('Роли')
     return await role_ws.col_values(1)
-
-
-asyncio.run(read_roles(agcm), debug=True)

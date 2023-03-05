@@ -3,7 +3,7 @@ from aiogram import types
 
 from sqlalchemy.orm import sessionmaker
 
-from bot.handlers.keyboards.admin_start import ADMIN_MENU_BOARD
+from bot.handlers.keyboards.admin_kb import ADMIN_MENU_BOARD
 
 
 async def start(message: types.Message):

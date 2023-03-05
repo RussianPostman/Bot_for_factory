@@ -1,18 +1,29 @@
-from sqlalchemy import Column, VARCHAR, select, BigInteger
+from sqlalchemy import Column, VARCHAR, select, BigInteger, Table, ForeignKey, String
+from sqlalchemy.orm import mapped_column, Mapped, relationship
+from sqlalchemy.orm import sessionmaker, selectinload
+from sqlalchemy.exc import ProgrammingError
+from sqlalchemy.engine.result import ScalarResult
+
 from bot.db.base import BaseModel
 
-from sqlalchemy.exc import ProgrammingError
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.orm import selectinload
+
+association_table = Table(
+    "association_table",
+    BaseModel.metadata,
+    Column("user_id", ForeignKey("users.user_id")),
+    Column("role_id", ForeignKey("roles.id")),
+)
 
 
 class User(BaseModel):
     """Класс пользователя"""
     __tablename__ = 'users'
 
-    user_id = Column(BigInteger, unique=True, nullable=False, primary_key=True)
-    name = Column(VARCHAR(100), unique=False, nullable=True)
-    role = Column(VARCHAR(50), unique=False)
+    user_id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=False)
+    name: Mapped[str] = mapped_column(String(100))
+    roles: Mapped[list['Role']] = relationship(
+        secondary=association_table, back_populates="users"
+    )
 
     def __str__(self) -> int:
         return f'User: {self.name} - {self.role}'
@@ -21,28 +32,28 @@ class User(BaseModel):
         return self.__str__()
 
 
-async def get_user(user_id: int, session_maker: sessionmaker) -> User:
-    """
-    Получить пользователя по его id
-    :param user_id:
-    :param session_maker:
-    :return:
-    """
-    async with session_maker() as session:
-        async with session.begin():
-            result = await session.execute(
-                select(User).options(
-                    selectinload(User.posts)).filter(User.user_id == user_id)
-            )
-            return result.scalars().one()
+class Role(BaseModel):
+    """Класс ролей пользователей"""
+    __tablename__ = 'roles'
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[int] = mapped_column(String(100))
+    users: Mapped[list[User]] = relationship(
+        secondary=association_table, back_populates="roles"
+    )
+
+    def __str__(self) -> int:
+        return f'Role: {self.name}'
+
+    def __repr__(self):
+        return self.__str__()
 
 
 async def create_user(
         user_id: int,
         username: str,
-        role: str,
-        session_maker:
-        sessionmaker
+        role: Role,
+        session_maker: sessionmaker
         ) -> None:
     async with session_maker() as session:
         async with session.begin():
@@ -51,11 +62,7 @@ async def create_user(
                 username=username,
                 role=role
             )
-            try:
-                session.add(user)
-            except ProgrammingError:
-                # TODO: add log
-                pass
+            session.add(user)
 
 
 async def is_user_exists(user_id: int, session_maker: sessionmaker) -> bool:
@@ -66,3 +73,22 @@ async def is_user_exists(user_id: int, session_maker: sessionmaker) -> bool:
             )
             result = sql_res.first()
             return bool(result)
+
+
+async def create_role(
+        name: str,
+        session_maker: sessionmaker
+        ) -> None:
+    async with session_maker() as session:
+        async with session.begin():
+            user = Role(name=name)
+            session.add(user)
+
+
+async def get_roles_list(session_maker: sessionmaker) -> ScalarResult:
+    async with session_maker() as session:
+        async with session.begin():
+            sql_res = await session.scalars(
+                select(Role.name)
+            )
+            return sql_res.all()

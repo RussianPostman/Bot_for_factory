@@ -4,9 +4,10 @@ from aiogram.filters.command import CommandStart
 from aiogram.fsm.state import any_state
 
 from bot.handlers.commands import start, help
-from bot.handlers.admin.create_category import censel_hendler, \
-    start_category_create, CategoryStates, category_create
-
+from bot.handlers.admin.create_user import censel_hendler
+from bot.handlers.admin.synchronization import start_synchronization, \
+    SynchronizationStates, synchronization_roles
+from bot.handlers.admin.synchronization import SynchronizationStates
 
 
 __all__ = ['register_user_commands']
@@ -23,8 +24,16 @@ def register_user_commands(router: Router) -> Router:
     router.message.register(censel_hendler, Command('cancel'), any_state)
     router.message.register(censel_hendler, F.text.casefold() == 'отмена' or 'Отмена', any_state)
 
-    router.callback_query.register(start_category_create, F.data == 'start_category_create')
-    router.message.register(category_create, CategoryStates.waiting_for_name)
+    # хендлеры синхронизации бд
+    router.message.register(start_synchronization, F.text == 'Синхронизация')
+    router.callback_query.register(
+        synchronization_roles,
+        SynchronizationStates.chose,
+        F.data == 'synchronization_roles'
+        )
+
+    # router.callback_query.register(start_category_create, F.data == 'start_category_create')
+    # router.message.register(category_create, CategoryStates.waiting_for_name)
 
     # router.callback_query.register(RegisterCheck)
     # router.message.register(RegisterCheck)

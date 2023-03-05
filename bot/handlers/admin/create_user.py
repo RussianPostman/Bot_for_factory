@@ -13,21 +13,29 @@ class CategoryStates(StatesGroup):
         Состояния для категорий
     """
     waiting_for_name = State()
+    waiting_for_id = State()
+    select_role = State()
 
 
-async def start_category_create(message: types.Message, state: FSMContext):
+async def start_user_create(message: types.Message, state: FSMContext):
     await state.set_state(CategoryStates.waiting_for_name)
-    await message.answer('Введите название новой категории')
+    await message.answer('Введите имя нового пользователя')
 
 
-async def category_create(message: types.Message, state: FSMContext, session_maker: sessionmaker):
+async def waiting_for_id(message: types.Message, state: FSMContext):
+    await state.update_data(waiting_for_name=message.text)
+    await state.set_state(CategoryStates.waiting_for_id)
+    await message.answer('Введите Telegram id пользователя')
+
+
+async def user_create(message: types.Message, state: FSMContext, session_maker: sessionmaker):
     name = message.text
     await state.clear()
     try:
         await create_category(name=name, session_maker=session_maker)
-        
     except ProgrammingError:
-        await message.answer('Ошибка. Возможно вы ввеи недопустимые символы')
+        await message.answer('Ошибка. Возможно вы ввели недопустимые символы')
+
 
 # функция выхода из машины состояний
 async def censel_hendler(message: types.Message, state: FSMContext):

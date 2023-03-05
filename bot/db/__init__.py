@@ -6,10 +6,15 @@ __all__ = [
     'BaseModel',
     'is_user_exists',
     'Category',
-    'Product'
+    'Product',
+    'Role',
+    'create_category',
+    'create_user',
+    'create_role',
+    'get_roles_list'
 ]
 
 from .engine import create_async_engine, get_session_maker, proceed_schemas
-from .user import User, is_user_exists
+from .user import User, Role, is_user_exists, create_user, create_role, get_roles_list
 from .base import BaseModel
 from .product_category import Category, Product, create_category
