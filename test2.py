@@ -2,6 +2,7 @@ import asyncio
 from pprint import pprint
 
 import gspread_asyncio
+from gspread_asyncio import AsyncioGspreadClient, AsyncioGspreadSpreadsheet, AsyncioGspreadWorksheet
 
 # from google-auth package
 from google.oauth2.service_account import Credentials
@@ -45,5 +46,19 @@ async def example(agcm):
     #     await zero_ws.append_rows([['1', '2', '3'], ['1', '2', '3'], ['1', '2', '3'], ['1', '2', '3'], ['1', '2', '3'],])
     # pprint(await zero_ws.get_all_values())
     print("All done!")
-# Turn on debugging if you're new to asyncio!
-asyncio.run(example(agcm), debug=True)
+
+
+async def get_ws_by_id(id: int) -> AsyncioGspreadWorksheet:
+    agc: AsyncioGspreadClient = await agcm.authorize()
+    ss = await agc.open_by_url("https://docs.google.com/spreadsheets/d/1ANGDNWvPXYmmJE_UeVSHy6DaBONk2vBtEgkWG7_mHe4")
+
+    worksheets = await ss.worksheets()
+    for ws in worksheets:
+        ws: AsyncioGspreadWorksheet
+        if ws.title.endswith(str(id)):
+            print(ws.title)
+            return ws
+    print('Таблица не нашлась\n')
+
+
+asyncio.run(get_ws_by_id(2125332262))

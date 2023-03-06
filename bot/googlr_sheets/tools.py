@@ -1,6 +1,7 @@
 import asyncio
 import gspread_asyncio
-from gspread_asyncio import AsyncioGspreadClientManager
+from gspread_asyncio import AsyncioGspreadClientManager, \
+    AsyncioGspreadSpreadsheet, AsyncioGspreadWorksheet
 
 from google.oauth2.service_account import Credentials
 
@@ -15,6 +16,15 @@ def get_creds():
         "https://www.googleapis.com/auth/drive",
     ])
     return scoped
+
+
+async def get_ws_by_id(id: int, ss: AsyncioGspreadSpreadsheet) -> AsyncioGspreadWorksheet:
+    worksheets = await ss.worksheets()
+    for ws in worksheets:
+        ws: AsyncioGspreadWorksheet
+        if ws.title.endswith(str(id)):
+            return ws
+    print('Таблица не нашлась\n')
 
 
 agcm = AsyncioGspreadClientManager(get_creds)
@@ -33,12 +43,12 @@ async def create_worksheet(
         heads: list[str],
         agcm: AsyncioGspreadClientManager = agcm,
         rows: int = 3,
-        cols: int = 3
+        cols: int = 10
         ):
     """
     Создать гугл таблицу
-    :param name:
-    :param heads:
+    :name:
+    :heads:
     :rows:
     :cols:
     """
@@ -49,7 +59,24 @@ async def create_worksheet(
     await new_worksheet.append_row(heads)
 
 
+async def delete_worksheet(
+        user_id: int,
+        ):
+    """
+    Удаляет таблицу юзера пл его ТГ id
+    :user_id:
+    """
+    agc: gspread_asyncio.AsyncioGspreadClient = await agcm.authorize()
+    ss = await agc.open_by_url(USERS_SHEETS)
+    worksheet: AsyncioGspreadWorksheet = await get_ws_by_id(user_id, ss)
+    await ss.del_worksheet(worksheet)
+    print('Таблица удалена')
+
+
 async def read_roles(agcm: AsyncioGspreadClientManager = agcm):
+    """
+    Инструмент синхронизации. Выдаёт список ролей из гугл кадендаря
+    """
     agc: gspread_asyncio.AsyncioGspreadClient = await agcm.authorize()
     ss = await agc.open_by_url(USERS_SHEETS)
     role_ws = await ss.worksheet('Роли')

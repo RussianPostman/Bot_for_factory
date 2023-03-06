@@ -1,4 +1,5 @@
-from sqlalchemy import Column, VARCHAR, select, BigInteger, Table, ForeignKey, String
+from sqlalchemy import Column, VARCHAR, select, BigInteger, Table, \
+    ForeignKey, String, delete
 from sqlalchemy.orm import mapped_column, Mapped, relationship
 from sqlalchemy.orm import sessionmaker, selectinload
 from sqlalchemy.exc import ProgrammingError
@@ -26,7 +27,7 @@ class User(BaseModel):
     )
 
     def __str__(self) -> int:
-        return f'User: {self.name} - {self.role}'
+        return f'User: {self.name}'
 
     def __repr__(self):
         return self.__str__()
@@ -49,20 +50,76 @@ class Role(BaseModel):
         return self.__str__()
 
 
-async def create_user(
+async def get_list_users(session_maker: sessionmaker) -> list[User]:
+    async with session_maker() as session:
+        async with session.begin():
+            sql_res = await session.scalars(
+                select(User)
+            )
+            result = sql_res.all()
+            print(result)
+            return result
+
+
+async def create_user_admin(
         user_id: int,
         username: str,
-        role: Role,
         session_maker: sessionmaker
         ) -> None:
     async with session_maker() as session:
         async with session.begin():
+            sql_res = await session.scalars(
+                select(Role).where(Role.name == 'Администратор')
+            )
+            role = sql_res.first()
+            user = User(
+                user_id=int(user_id),
+                name=username,
+            )
+            print(type(role))
+            user.roles.append(role)
+            session.add(user)
+
+
+async def create_user_worker(
+        user_id: int,
+        username: str,
+        session_maker: sessionmaker
+        ) -> None:
+    async with session_maker() as session:
+        async with session.begin():
+            sql_res = await session.scalars(
+                select(Role).where(Role.name != 'Администратор')
+            )
+            roles = sql_res.all()
             user = User(
                 user_id=user_id,
-                username=username,
-                role=role
+                name=username,
             )
+            for role in roles:
+                user.roles.append(role)
             session.add(user)
+
+
+async def delete_user(
+        user_id: int,
+        session_maker: sessionmaker
+        ):
+    async with session_maker() as session:
+        async with session.begin():
+            sql_res = await session.scalars(
+                select(User)
+                .options(selectinload(User.roles))
+                .where(User.user_id == user_id)
+            )
+            result: User = sql_res.first()
+            result.roles.clear()
+
+    async with session_maker() as session:
+        async with session.begin():
+            await session.execute(
+                delete(User).where(User.user_id == user_id)
+            )
 
 
 async def is_user_exists(user_id: int, session_maker: sessionmaker) -> bool:
