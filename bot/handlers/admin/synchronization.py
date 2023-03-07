@@ -4,10 +4,11 @@ from aiogram.methods import SendMessage
 from aiogram import types
 
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.exc import ProgrammingError
 
-from bot.googlr_sheets.tools import read_roles
-from bot.db import create_role, get_roles_list
+from bot.googlr_sheets.products_tools import read_category, read_products
+from bot.googlr_sheets.user_tools import read_roles
+from bot.db import create_role, get_roles_list, get_сategory_list, \
+    create_category, get_products_list, update_product
 from bot.handlers.keyboards.admin_kb import SYNCHRONIZATION_BOARD
 
 
@@ -44,4 +45,44 @@ async def synchronization_roles(
             await create_role(role_name, session_maker)
     await SendMessage(
         text='Роли синхронезированы',
+        chat_id=query.from_user.id)
+
+
+async def synchronization_products(
+        query: types.CallbackQuery,
+        session_maker: sessionmaker,
+        state: FSMContext):
+    await state.clear()
+    await SendMessage(
+        text='Получаем продукты из гугл таблиц',
+        chat_id=query.from_user.id)
+
+    # синхроизация категорий
+    category_list = await read_category()
+    db_category_list_list = await get_сategory_list(session_maker)
+    for category_name in category_list:
+        if category_name not in db_category_list_list:
+            await SendMessage(
+                text=f'Добавляем категорию {category_name}',
+                chat_id=query.from_user.id)
+            await create_category(category_name, session_maker)
+    await SendMessage(
+        text='Категории синхронезированы',
+        chat_id=query.from_user.id)
+    print(category_list)
+
+    # синхроизация продуктов
+    for cat in category_list:
+        products_list = await read_products(cat)
+        db_products_list = await get_products_list(session_maker, cat)
+
+        for product in products_list:
+            if product[0] not in db_products_list:
+                await SendMessage(
+                    text=f'Добавляем деталь {product[0]} в категорию {cat}',
+                    chat_id=query.from_user.id)
+                await update_product(product, cat, session_maker)
+
+    await SendMessage(
+        text='Категории синхронезированы',
         chat_id=query.from_user.id)

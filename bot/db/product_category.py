@@ -1,8 +1,8 @@
 from .base import BaseModel
 
-from sqlalchemy import Column, Integer, VARCHAR, String, select, ForeignKey
+from sqlalchemy import Column, Integer, VARCHAR, ScalarResult, String, delete, select, ForeignKey
 from sqlalchemy.exc import ProgrammingError
-from sqlalchemy.orm import sessionmaker, relationship, mapped_column, Mapped
+from sqlalchemy.orm import sessionmaker, relationship, mapped_column, Mapped, selectinload
 
 
 class Category(BaseModel):
@@ -18,12 +18,13 @@ class Category(BaseModel):
 
 
 class Product(BaseModel):
-    """Класс продуктов производства"""
+    """
+    Класс продуктов производства
+    """
     __tablename__ = 'product'
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String(100))
-    role: Mapped[str] = mapped_column(String(100))
     turner: Mapped[int]
     caster: Mapped[int]
     miller: Mapped[int]
@@ -35,13 +36,68 @@ class Product(BaseModel):
         return f'Продукт: {self.name}'
 
 
+async def get_сategory_list(session_maker: sessionmaker) -> list[Category.name]:
+    async with session_maker() as session:
+        async with session.begin():
+            sql_res = await session.scalars(
+                select(Category.name)
+            )
+            return sql_res.all()
+
+
 async def create_category(
         name: str,
         session_maker: sessionmaker
         ) -> None:
     async with session_maker() as session:
         async with session.begin():
-            user = Category(
+            category = Category(
                 name=name
             )
-            session.add(user)
+            session.add(category)
+
+
+async def get_products_list(
+        session_maker: sessionmaker,
+        cat_name: str
+        ) -> list[Product.name]:
+    async with session_maker() as session:
+        async with session.begin():
+            sql_res = await session.scalars(
+                select(Product.name)
+                .where(Product.category.has(Category.name == cat_name))
+            )
+            return sql_res.all()
+
+
+async def update_product(
+        product_data: list[str],
+        cat_name: str,
+        session_maker: sessionmaker
+        ) -> None:
+    async with session_maker() as session:
+        async with session.begin():
+            sql_res = await session.scalars(
+                delete(Product)
+                .options(selectinload(Product.category))
+                .where(Product.category.has(Category.name == cat_name))
+            )
+
+    async with session_maker() as session:
+        async with session.begin():
+            sql_res = await session.scalars(
+                select(Category)
+                .options(selectinload(Category.products))
+                .where(Category.name == cat_name)
+            )
+            category: Category = sql_res.first()
+            product = Product(
+                name=product_data[0],
+                turner=float(product_data[1]),
+                caster=float(product_data[2]),
+                miller=float(product_data[3]),
+                packaging=float(product_data[4])
+            )
+            category.products.append(product)
+            session.add(product)
+            session.add(category)

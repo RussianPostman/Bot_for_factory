@@ -10,7 +10,7 @@ from bot.handlers.admin.create_user import censel_hendler, start_user_create, \
 from bot.handlers.admin.delete_user import start_user_delete, user_delete, \
     DeleteUserStates
 from bot.handlers.admin.synchronization import start_synchronization, \
-    SynchronizationStates, synchronization_roles
+    SynchronizationStates, synchronization_roles, synchronization_products
 
 
 __all__ = ['register_user_commands']
@@ -47,6 +47,8 @@ def register_user_commands(router: Router) -> Router:
     router.callback_query.register(
         synchronization_roles, SynchronizationStates.chose, F.data == 'synchronization_roles'
         )
+    router.callback_query.register(
+        synchronization_products, SynchronizationStates.chose, F.data == 'synchronization_products')
 
     # router.callback_query.register(start_category_create, F.data == 'start_category_create')
     # router.message.register(category_create, CategoryStates.waiting_for_name)

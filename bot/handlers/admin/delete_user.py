@@ -7,7 +7,7 @@ from sqlalchemy.orm import sessionmaker
 
 from bot.db import get_list_users, delete_user
 from bot.handlers.keyboards.admin_kb import generate_users_board, UserCD
-from bot.googlr_sheets.tools import delete_worksheet
+from bot.googlr_sheets.user_tools import delete_worksheet
 
 
 class DeleteUserStates(StatesGroup):

@@ -7,8 +7,9 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import ProgrammingError
 
 from bot.db import create_user_admin, create_user_worker
-from bot.handlers.keyboards.admin_kb import ADMIN_USER_ROLE, WORKER_USER_ROLE
-from bot.googlr_sheets.tools import create_worksheet
+from bot.handlers.keyboards.admin_kb import ADMIN_USER_ROLE, WORKER_USER_ROLE, \
+    ADMIN_MENU_BOARD
+from bot.googlr_sheets.user_tools import create_worksheet
 
 
 REPORT_HEADS = [
@@ -73,4 +74,7 @@ async def censel_hendler(message: types.Message, state: FSMContext):
     if current_state is None:
         return
     await state.clear()
-    await message.reply('Ok')
+    await SendMessage(
+        text='Ок',
+        chat_id=message.from_user.id,
+        reply_markup=ADMIN_MENU_BOARD)

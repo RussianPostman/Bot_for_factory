@@ -14,11 +14,15 @@ __all__ = [
     'get_roles_list',
     'delete_user',
     'get_list_users',
-    'create_user_worker'
+    'create_user_worker',
+    'get_сategory_list',
+    'get_products_list',
+    'update_product'
 ]
 
 from .engine import create_async_engine, get_session_maker, proceed_schemas
 from .user import User, Role, is_user_exists, create_user_admin, create_role, \
     get_roles_list, get_list_users, delete_user, create_user_worker
 from .base import BaseModel
-from .product_category import Category, Product, create_category
+from .product_category import Category, Product, create_category, \
+    get_сategory_list, get_products_list, update_product
