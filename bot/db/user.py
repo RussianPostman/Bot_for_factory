@@ -50,6 +50,15 @@ class Role(BaseModel):
         return self.__str__()
 
 
+async def get_user(user_id: int, session_maker: sessionmaker):
+    async with session_maker() as session:
+        async with session.begin():
+            sql_res = await session.scalars(
+                select(User).where(User.user_id  == user_id)
+            )
+            return sql_res.first()
+
+
 async def get_list_users(session_maker: sessionmaker) -> list[User]:
     async with session_maker() as session:
         async with session.begin():
@@ -130,6 +139,30 @@ async def is_user_exists(user_id: int, session_maker: sessionmaker) -> bool:
             )
             result = sql_res.first()
             return bool(result)
+
+
+async def is_user_admin(user_id: int, session_maker: sessionmaker) -> bool:
+    async with session_maker() as session:
+        async with session.begin():
+            sql_res = await session.execute(
+                select(User)
+                .where(
+                    (User.user_id == user_id) &
+                    (User.roles.any(Role.name == 'Администратор'))
+                )
+            )
+            result = sql_res.first()
+            return bool(result)
+
+
+async def get_user_roles(user_id: int, session_maker: sessionmaker):
+    async with session_maker() as session:
+        async with session.begin():
+            sql_res = await session.scalars(
+                select(Role.name)
+                .where(Role.users.any(User.user_id == user_id))
+            )
+            return sql_res.all()
 
 
 async def create_role(

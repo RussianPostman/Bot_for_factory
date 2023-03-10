@@ -1,4 +1,4 @@
-import asyncio
+import gspread
 import gspread_asyncio
 from gspread_asyncio import AsyncioGspreadClientManager, \
     AsyncioGspreadSpreadsheet, AsyncioGspreadWorksheet
@@ -30,14 +30,6 @@ async def get_ws_by_id(id: int, ss: AsyncioGspreadSpreadsheet) -> AsyncioGspread
 agcm = AsyncioGspreadClientManager(get_creds)
 
 
-# async def example(agcm):
-#     agc: gspread_asyncio.AsyncioGspreadClient = await agcm.authorize()
-#     ss = await agc.open_by_url(USERS_SHEETS)
-#     zero_ws = await ss.worksheet('My Test Worksheet')
-#     pprint(await zero_ws.get_all_values())
-#     print("All done!")
-
-
 async def create_worksheet(
         name: str,
         heads: list[str],
@@ -54,8 +46,14 @@ async def create_worksheet(
     """
     agc: gspread_asyncio.AsyncioGspreadClient = await agcm.authorize()
     ss = await agc.open_by_url(USERS_SHEETS)
-    await ss.add_worksheet(name, rows, cols)
-    new_worksheet = await ss.worksheet(name)
+    try:
+        new_worksheet = await ss.worksheet(name)
+    except StopIteration:
+        await ss.add_worksheet(name, rows, cols)
+        new_worksheet = await ss.worksheet(name)
+    except gspread.exceptions.WorksheetNotFound:
+        await ss.add_worksheet(name, rows, cols)
+        new_worksheet = await ss.worksheet(name)
     await new_worksheet.append_row(heads)
 
 
@@ -81,3 +79,51 @@ async def read_roles(agcm: AsyncioGspreadClientManager = agcm):
     ss = await agc.open_by_url(USERS_SHEETS)
     role_ws = await ss.worksheet('Роли')
     return await role_ws.col_values(1)
+
+
+async def read_salarys(agcm: AsyncioGspreadClientManager = agcm):
+    agc: gspread_asyncio.AsyncioGspreadClient = await agcm.authorize()
+    ss = await agc.open_by_url(USERS_SHEETS)
+    role_ws = await ss.worksheet('Оклады')
+    return await role_ws.col_values(1)
+
+
+async def read_reports(
+        user_id: str = 'Ежемесячные отчёты',
+        agcm: AsyncioGspreadClientManager = agcm
+        ):
+    """
+    Считывает все отчёты чтобы расчитать итоговый заработок
+    """
+    agc: gspread_asyncio.AsyncioGspreadClient = await agcm.authorize()
+    ss = await agc.open_by_url(USERS_SHEETS)
+    worksheet = await get_ws_by_id(user_id, ss)
+    list_values = await worksheet.get_all_values()
+    list_values.pop(0)
+    return list_values
+
+
+async def add_reports(
+        values: dict,
+        user_id: str = 'Ежемесячные отчёты',
+        agcm: AsyncioGspreadClientManager = agcm
+        ):
+    """
+    Считывает все отчёты чтобы расчитать итоговый заработок
+    """
+    agc: gspread_asyncio.AsyncioGspreadClient = await agcm.authorize()
+    ss = await agc.open_by_url(USERS_SHEETS)
+    data_list = []
+    worksheet = await get_ws_by_id(user_id, ss)
+    data_list.append(values.get('user_id'))
+    data_list.append(values.get('username'))
+    data_list.append(values.get('deta'))
+    data_list.append(values.get('product'))
+    data_list.append(values.get('count'))
+    data_list.append(values.get('prise'))
+    data_list.append(values.get('salary'))
+    data_list.append(values.get('comment'))
+    data_list.append(values.get('amount'))
+    data_list.append(values.get('marriage'))
+
+    await worksheet.append_row(data_list)
