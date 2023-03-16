@@ -37,7 +37,7 @@ async def main():
         username=os.getenv("POSTGRES_USER"),
         host='127.0.0.1',
         database=os.getenv("POSTGRES_DB"),
-        port=8765,
+        port=os.getenv("POSTGRES_PORT"),
         password=os.getenv("POSTGRES_PASSWORD")
     )
 
