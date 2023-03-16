@@ -15,7 +15,7 @@ from bot.handlers.keyboards.worker_kb import CategoryCD, ProductCD, \
     UserRoleCD, SalarysCD
 from bot.googlr_sheets.user_tools import add_reports, read_salarys
 from bot.handlers.keyboards.worker_kb import START_WORKER_BOARD, \
-    SELECT_TYPE_REPORT
+    SELECT_TYPE_REPORT, EMPTY_BOARD
 
 
 ROLE_NAMES = {
@@ -141,6 +141,7 @@ async def select_marriage(
     await SendMessage(
         text='Оставьте комментарий',
         chat_id=message.from_user.id,
+        reply_markup=EMPTY_BOARD
         )
 
 
@@ -173,7 +174,8 @@ async def send_report(
     await create_report(report_data, session_maker)
     await add_reports(report_data, message.from_user.id)
     await SendMessage(
-        text=f'Отчёт о работе на сумму {report_data.get("amount")} отправлен',
+        text=(f'Отчёт о работе над {product.name}-{report_data.get("prise")}р'
+              + f' на сумму {report_data.get("amount")}р отправлен'),
         chat_id=message.from_user.id,
         reply_markup=START_WORKER_BOARD
         )
@@ -214,6 +216,7 @@ async def select_count_2(
     await SendMessage(
         text='Оставьте комментарий',
         chat_id=message.from_user.id,
+        reply_markup=EMPTY_BOARD
         )
 
 

@@ -2,8 +2,11 @@ import gspread
 import gspread_asyncio
 from gspread_asyncio import AsyncioGspreadClientManager, \
     AsyncioGspreadSpreadsheet, AsyncioGspreadWorksheet
+from asyncpg.exceptions import UniqueViolationError
 
 from google.oauth2.service_account import Credentials
+
+from bot.db import User
 
 USERS_SHEETS = "https://docs.google.com/spreadsheets/d/1ANGDNWvPXYmmJE_UeVSHy6DaBONk2vBtEgkWG7_mHe4"
 
@@ -53,6 +56,8 @@ async def create_worksheet(
         new_worksheet = await ss.worksheet(name)
     except gspread.exceptions.WorksheetNotFound:
         await ss.add_worksheet(name, rows, cols)
+        new_worksheet = await ss.worksheet(name)
+    except UniqueViolationError:
         new_worksheet = await ss.worksheet(name)
     await new_worksheet.append_row(heads)
 
@@ -127,3 +132,20 @@ async def add_reports(
     data_list.append(values.get('marriage'))
 
     await worksheet.append_row(data_list)
+
+
+async def add_salary(
+        user: User,
+        salary: float,
+        date: str,
+        agcm: AsyncioGspreadClientManager = agcm
+        ) -> None:
+    agc: gspread_asyncio.AsyncioGspreadClient = await agcm.authorize()
+    ss = await agc.open_by_url(USERS_SHEETS)
+    ws = await ss.worksheet('Ежемесячные отчёты')
+    row = []
+    row.append(user.user_id)
+    row.append(user.name)
+    row.append(date)
+    row.append(salary)
+    await ws.append_row(row)

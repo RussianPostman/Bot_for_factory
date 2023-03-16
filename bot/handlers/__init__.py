@@ -13,7 +13,7 @@ from bot.handlers.admin.delete_user import start_user_delete, user_delete, \
     DeleteUserStates
 from bot.handlers.admin.synchronization import start_synchronization, \
     SynchronizationStates, synchronization_roles, synchronization_products
-from bot.handlers.admin.is_admin_filter import IsAdminFilter
+from bot.handlers.filters import IsAdminFilter, IsRegisterFilter
 from bot.handlers.worker.send_report import start_report, select_product, \
     ReportStates, select_category, select_role, select_count, \
     select_marriage, send_report, select_type_1, select_type_2, \
@@ -41,7 +41,7 @@ def register_user_commands(router: Router) -> Router:
     router.callback_query.register(censel_hendler, F.data == 'cancel', any_state)
 
     # отправка очёта
-    router.message.register(start_report, F.text == 'Отправить отчёт о работе')
+    router.message.register(start_report, IsRegisterFilter('Отправить отчёт о работе'))
     # отчёт по сдельной работе
     router.message.register(
         select_type_1, ReportStates.select_type, F.text == 'Сдельная')
@@ -63,12 +63,12 @@ def register_user_commands(router: Router) -> Router:
     router.message.register(send_report_2, ReportStates.select_comment_2)
 
     # узнать сколько заработал сегодня
-    router.message.register(money_info_today, F.text == 'Узнать cумму на сегоденя')
-    router.message.register(money_info_month, F.text == 'Узнать сумму в этом месяце')
+    router.message.register(money_info_today, IsRegisterFilter('Узнать cумму на сегоденя'))
+    router.message.register(money_info_month, IsRegisterFilter('Узнать сумму в этом месяце'))
 
     # хендлеры админа:
     # создание пользователя
-    router.message.register(start_user_create, F.text == 'Добавить пользователя')
+    router.message.register(start_user_create, IsAdminFilter('Добавить пользователя'))
     router.message.register(waiting_for_name, UserStates.waiting_for_name)
     router.message.register(waiting_for_id, UserStates.waiting_for_id)
     router.callback_query.register(user_create, UserStates.select_role, F.data == 'admin')
@@ -81,16 +81,16 @@ def register_user_commands(router: Router) -> Router:
         )
 
     # информация о пользователе
-    router.message.register(start_user_info, F.text == 'Информация о пользователе')
+    router.message.register(start_user_info, IsAdminFilter('Информация о пользователе'))
     router.callback_query.register(
         user_info_month, UserInfoStates.waiting_for_id, UserCD.filter(F.flag == '1')
         )
 
     # гугл ссылки
-    router.message.register(tables_list, F.text == 'Перейти к Google таблицам')
+    router.message.register(tables_list, IsAdminFilter('Перейти к Google таблицам'))
 
     # хендлеры синхронизации бд
-    router.message.register(start_synchronization, F.text == 'Синхронизация')
+    router.message.register(start_synchronization, IsAdminFilter('Синхронизация'))
     router.callback_query.register(
         synchronization_roles, SynchronizationStates.chose, F.data == 'synchronization_roles'
         )

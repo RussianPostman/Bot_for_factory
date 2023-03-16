@@ -37,9 +37,10 @@ def sum_month(all_records: list[list[str]]):
     edate = date.today()
     result = pandas.date_range(
         sdate,
-        edate-timedelta(days=1),
+        edate,
         freq='d'
         ).strftime('%Y-%m-%d').tolist()
+    print(result)
 
     for record in all_records:
         record: list

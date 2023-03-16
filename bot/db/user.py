@@ -1,8 +1,7 @@
-from sqlalchemy import Column, VARCHAR, select, BigInteger, Table, \
+from sqlalchemy import Column, select, BigInteger, Table, \
     ForeignKey, String, delete
 from sqlalchemy.orm import mapped_column, Mapped, relationship
 from sqlalchemy.orm import sessionmaker, selectinload
-from sqlalchemy.exc import ProgrammingError
 from sqlalchemy.engine.result import ScalarResult
 
 from bot.db.base import BaseModel
@@ -153,6 +152,19 @@ async def is_user_admin(user_id: int, session_maker: sessionmaker) -> bool:
             )
             result = sql_res.first()
             return bool(result)
+
+
+async def list_without_admins(session_maker: sessionmaker) -> list[User]:
+    async with session_maker() as session:
+        async with session.begin():
+            sql_res = await session.scalars(
+                select(User)
+                .where(
+                    User.roles.any(Role.name != 'Администратор')
+                )
+            )
+            result = sql_res.all()
+            return result
 
 
 async def get_user_roles(user_id: int, session_maker: sessionmaker):

@@ -25,13 +25,14 @@ __all__ = [
     'get_user_roles',
     'get_product',
     'get_user',
-    'create_report'
+    'create_report',
+    'list_without_admins'
 ]
 
 from .engine import create_async_engine, get_session_maker, proceed_schemas
 from .user import User, Role, is_user_exists, create_user_admin, create_role, \
     get_roles_list, get_list_users, delete_user, create_user_worker, \
-    is_user_admin, get_user_roles, get_user
+    is_user_admin, get_user_roles, get_user, list_without_admins
 from .base import BaseModel
 from .product_category import Category, Product, create_category, \
     get_сategory_list, get_products_names_list, update_product, \

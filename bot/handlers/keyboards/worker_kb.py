@@ -61,6 +61,19 @@ SELECT_TYPE_REPORT = ReplyKeyboardMarkup(
             KeyboardButton(text='Сдельная'),
             KeyboardButton(text='Почасовая')
         ],
+        [
+            KeyboardButton(text='Отмена')
+        ],
+    ],
+    resize_keyboard=True
+)
+
+
+EMPTY_BOARD = ReplyKeyboardMarkup(
+    keyboard=[
+        [
+            KeyboardButton(text='Попустить')
+        ],
     ],
     resize_keyboard=True
 )

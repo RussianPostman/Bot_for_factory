@@ -27,14 +27,14 @@ async def help(message: types.Message, session_maker: sessionmaker):
     Хендлер для команды /help
     :param message:
     """
-    return await message.answer(
-            'Started', reply_markup=ADMIN_MENU_BOARD)
-    # if is_user_admin(message.from_user.id, session_maker):
-    #     return await message.answer(
+    # return await message.answer(
     #         'Started', reply_markup=ADMIN_MENU_BOARD)
-    # else:
-    #     return await message.answer(
-    #         'Started', reply_markup=START_WORKER_BOARD)
+    if is_user_admin(message.from_user.id, session_maker):
+        return await message.answer(
+            'Started', reply_markup=ADMIN_MENU_BOARD)
+    else:
+        return await message.answer(
+            'Started', reply_markup=START_WORKER_BOARD)
 
 
 # функция выхода из машины состояний
