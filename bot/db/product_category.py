@@ -37,10 +37,10 @@ class Product(BaseModel):
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String(60))
-    turner: Mapped[int]
-    caster: Mapped[int]
-    miller: Mapped[int]
-    packaging: Mapped[int]
+    turner: Mapped[float]
+    caster: Mapped[float]
+    miller: Mapped[float]
+    packaging: Mapped[float]
     category_id: Mapped[int] = mapped_column(ForeignKey("category.id"))
     category: Mapped["Category"] = relationship(back_populates="products")
 

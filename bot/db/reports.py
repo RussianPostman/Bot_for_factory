@@ -1,6 +1,7 @@
 from .base import BaseModel
 
-from sqlalchemy import BigInteger, String, delete, select, update, ForeignKey
+import sqlalchemy as sa
+from sqlalchemy import BigInteger
 from sqlalchemy.orm import sessionmaker, mapped_column, Mapped
 
 
@@ -27,10 +28,10 @@ class Report(BaseModel):
     product: Mapped[str]
     deta: Mapped[str]
     count: Mapped[int]
-    prise: Mapped[int]
-    salary: Mapped[int]
+    prise: Mapped[float] = mapped_column(sa.Float)
+    salary: Mapped[float] = mapped_column(sa.Float)
     comment: Mapped[str]
-    amount: Mapped[int]
+    amount: Mapped[float] = mapped_column(sa.Float)
     marriage: Mapped[int]
 
     def __str__(self) -> int:

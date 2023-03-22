@@ -30,8 +30,6 @@ services:
       PGADMIN_DEFAULT_PASSWORD: ubnfhf
     ports:
         - "5050:80"
-    depends_on:
-      - postgres
 
 volumes:
   ppostgres.postgres.data: {}
