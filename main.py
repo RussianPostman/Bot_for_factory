@@ -1,7 +1,6 @@
 import os
 import asyncio
 import logging
-from datetime import datetime
 
 from aiogram import Bot, Dispatcher
 from aiogram.types import BotCommand
@@ -22,7 +21,7 @@ TELEGRAM_TOKEN = os.getenv('TOKEN')
 
 
 async def main():
-    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(level=logging.INFO)
     commands_for_bot = []
 
     for cmd in bot_commands:

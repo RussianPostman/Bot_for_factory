@@ -12,7 +12,7 @@ def sum_today(all_records: list[list[str]]):
         if record[2] == today:
             data.append(record)
     for one_record in data:
-        count += float(one_record[-2])
+        count += float(one_record[-2].replace(',', '.'))
     return count
 
 
@@ -40,12 +40,11 @@ def sum_month(all_records: list[list[str]]):
         edate,
         freq='d'
         ).strftime('%Y-%m-%d').tolist()
-    print(result)
 
     for record in all_records:
         record: list
         if record[2] in result:
             data.append(record)
     for one_record in data:
-        count += float(one_record[-2])
+        count += float(one_record[-2].replace(',', '.'))
     return count
