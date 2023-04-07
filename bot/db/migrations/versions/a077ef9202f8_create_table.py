@@ -1,8 +1,8 @@
-"""empty message
+"""create table
 
-Revision ID: f38dad332666
-Revises: 250e9dfa37a6
-Create Date: 2023-03-05 23:28:42.699790
+Revision ID: a077ef9202f8
+Revises: 
+Create Date: 2023-03-28 15:46:34.173799
 
 """
 from alembic import op
@@ -10,8 +10,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'f38dad332666'
-down_revision = '250e9dfa37a6'
+revision = 'a077ef9202f8'
+down_revision = None
 branch_labels = None
 depends_on = None
 
@@ -22,6 +22,20 @@ def upgrade() -> None:
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('name', sa.String(), nullable=False),
     sa.PrimaryKeyConstraint('id', name=op.f('pk_category'))
+    )
+    op.create_table('reports',
+    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+    sa.Column('user_id', sa.BigInteger(), nullable=False),
+    sa.Column('username', sa.String(), nullable=False),
+    sa.Column('product', sa.String(), nullable=False),
+    sa.Column('deta', sa.String(), nullable=False),
+    sa.Column('count', sa.Integer(), nullable=False),
+    sa.Column('prise', sa.Float(), nullable=False),
+    sa.Column('salary', sa.Float(), nullable=False),
+    sa.Column('comment', sa.String(), nullable=False),
+    sa.Column('amount', sa.Float(), nullable=False),
+    sa.Column('marriage', sa.Integer(), nullable=False),
+    sa.PrimaryKeyConstraint('id', name=op.f('pk_reports'))
     )
     op.create_table('roles',
     sa.Column('id', sa.Integer(), nullable=False),
@@ -41,12 +55,11 @@ def upgrade() -> None:
     )
     op.create_table('product',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
-    sa.Column('name', sa.String(length=100), nullable=False),
-    sa.Column('role', sa.String(length=100), nullable=False),
-    sa.Column('turner', sa.Integer(), nullable=False),
-    sa.Column('caster', sa.Integer(), nullable=False),
-    sa.Column('miller', sa.Integer(), nullable=False),
-    sa.Column('packaging', sa.Integer(), nullable=False),
+    sa.Column('name', sa.String(length=60), nullable=False),
+    sa.Column('turner', sa.Float(), nullable=False),
+    sa.Column('caster', sa.Float(), nullable=False),
+    sa.Column('miller', sa.Float(), nullable=False),
+    sa.Column('packaging', sa.Float(), nullable=False),
     sa.Column('category_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['category_id'], ['category.id'], name=op.f('fk_product_category_id_category')),
     sa.PrimaryKeyConstraint('id', name=op.f('pk_product'))
@@ -60,5 +73,6 @@ def downgrade() -> None:
     op.drop_table('association_table')
     op.drop_table('users')
     op.drop_table('roles')
+    op.drop_table('reports')
     op.drop_table('category')
     # ### end Alembic commands ###

@@ -1,14 +1,18 @@
+import os
 import gspread
 import gspread_asyncio
 from gspread_asyncio import AsyncioGspreadClientManager, \
     AsyncioGspreadSpreadsheet, AsyncioGspreadWorksheet
 from asyncpg.exceptions import UniqueViolationError
+from dotenv import load_dotenv
 
 from google.oauth2.service_account import Credentials
 
 from bot.db import User
 
-USERS_SHEETS = "https://docs.google.com/spreadsheets/d/1ANGDNWvPXYmmJE_UeVSHy6DaBONk2vBtEgkWG7_mHe4"
+load_dotenv()
+
+USERS_SHEETS = os.getenv('USERS_SHEETS')
 
 
 def get_creds():

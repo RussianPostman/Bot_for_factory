@@ -16,6 +16,7 @@ class RegisterCheck(BaseMiddleware):
         event: Union[Message, CallbackQuery],
         data: dict[str, Any]
     ) -> Any:
+
         user_id = event.from_user.id
 
         session_maker: sessionmaker = data['session_maker']

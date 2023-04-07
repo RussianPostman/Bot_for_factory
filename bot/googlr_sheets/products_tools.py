@@ -1,12 +1,16 @@
+import os
 import asyncio
 from pprint import pprint
 import gspread_asyncio
 from gspread_asyncio import AsyncioGspreadClientManager, \
     AsyncioGspreadSpreadsheet, AsyncioGspreadWorksheet
+from dotenv import load_dotenv
 
 from google.oauth2.service_account import Credentials
 
-RPODUCTS_SHEETS = "https://docs.google.com/spreadsheets/d/1v_gxbHhmazQpIywr7nXbbo-HXhNXvO6O4ON2k87Pzeo"
+load_dotenv()
+
+RPODUCTS_SHEETS = os.getenv('RPODUCTS_SHEETS')
 
 
 def get_creds():
